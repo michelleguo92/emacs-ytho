@@ -1,0 +1,228 @@
+                    ; * melpa
+(require 'package)
+(package-initialize)
+(add-to-list 'package-archives
+         '("melpa" . "http://melpa.milkbox.net/packages/")
+         'APPEND)
+(add-to-list 'package-archives '("org" . "http://orgmode.org/elpa/") t)
+(setq inhibit-startup-message t)
+
+
+                    ; * use package
+
+(require 'use-package)
+(require 'diminish)
+(require 'bind-key)
+
+(tool-bar-mode -1)
+(menu-bar-mode -1)
+(scroll-bar-mode -1)
+                    ; * interface
+(use-package badger-theme
+  :if window-system
+  :ensure t
+  :config
+  (load-theme 'badger t))
+                    ; * exwm
+;; #(server-start)
+;; #(use-package exwm
+;; #         :ensure t
+;; #         :commands (exwm-input-set-key)
+;; #         :init
+;; #         ;; Correct buffer names
+;; #         (add-hook 'exwm-update-class-hook
+;; #               (lambda ()
+;; #             (unless (or (string-prefix-p "sun-awt-X11-" exwm-instance-name)
+;; #                     (string= "gimp" exwm-instance-name))
+;; #               (exwm-workspace-rename-buffer exwm-class-name))))
+;; #         (add-hook 'exwm-update-title-hook
+;; #               (lambda ()
+;; #             (when (or (not exwm-instance-name)
+;; #                   (string-prefix-p "sun-awt-X11-" exwm-instance-name)
+;; #                   (string= "gimp" exwm-instance-name))
+;; #               (exwm-workspace-rename-buffer exwm-title))))
+;; #
+;; #         (exwm-input-set-key (kbd "s-l") 'exwm-reset)
+;; #         (exwm-input-set-key (kbd "s-!")
+;; #                 (lambda (command)
+;; #                   (interactive (list (read-shell-command "$ ")))
+;; #                   (start-process-shell-command command nil command)))
+;; #         ;; Simulation Keys
+;; #         ;; (exwm-input-set-simulation-keys
+;; #         ;;  '(([?\C-b] . left)
+;;          ;;    ([?\C-f] . right)
+;;          ;;    ([?\C-p] . up)
+;;          ;;    ([?\C-n] . down)
+;;          ;;    ([?\C-a] . home)
+;;          ;;    ([?\C-e] . end)
+;;          ;;    ([?\M-v] . prior)
+;;          ;;    ([?\C-v] . next)))
+
+;; #         (global-unset-key (kbd "C-z"))
+;; #         (push ?\C-q exwm-input-prefix-keys)
+;; #         (push ?\s-k exwm-input-prefix-keys)
+;; #         (push ?\s-f exwm-input-prefix-keys)
+;; #         (push ?\s-m exwm-input-prefix-keys)
+;; #         (push ?\s-q exwm-input-prefix-keys)
+;; #         (push ?\s-v exwm-input-prefix-keys)
+;; #         (define-key exwm-mode-map [?\C-q] 'exwm-input-send-next-key)
+;; #         (bind-key "s-k" #'exwm-input-release-keyboard exwm-mode-map)
+;; #         (bind-key "s-f" #'exwm-layout-set-fullscreen exwm-mode-map)
+;; #         (bind-key "s-m" #'exwm-floating-toggle-floating exwm-mode-map)
+;; #         (bind-key "s-q" #'exwm-input-send-next-key exwm-mode-map)
+;; #         (bind-key "s-v" #'exwm-workspace-move-window exwm-mode-map)
+;; #         (define-key exwm-mode-map "\C-ck" nil)
+;; #         (define-key exwm-mode-map "\C-cf" nil)
+;; #         (define-key exwm-mode-map "\C-cm" nil)
+;;          (define-key exwm-mode-map "\C-cq" nil)
+;;          (define-key exwm-mode-map "\C-cv" nil)
+
+;;          (bind-key "C-x C-b" 'exwm-workspace-switch-to-buffer)
+;;          (bind-key "C-c b" 'ibuffer)
+
+;;          (shell-command "xmodmap ~/.xmodmap")
+;;          (push 'ace-window exwm-input-command-whitelist)
+;;          (exwm-enable))
+
+                    ; * monitors
+;; (shell-command "xrandr --output VGA1 --auto --output DP1 --auto --right-of VGA1 --output HDMI1 --auto --right-of DP1")
+;; (require 'exwm-randr)
+;; (setq exwm-workspace-number 2)
+;; (setq exwm-randr-workspace-output-plist '(0 "VGA1" 1 "DVI-1-0"))
+;; (exwm-randr-enable)
+
+                    ; * python
+(use-package python
+  :mode ("\\.py\\'" . python-mode)
+  :interpreter ("python" . python-mode)
+  :demand
+  :config
+  (setq python-shell-interpreter "ipython"
+    python-shell-interpreter-args "-i"
+    python-shell-command "/usr/bin/python")
+  (add-hook 'before-save-hook 'delete-trailing-whitespace))
+
+
+                    ; * ido
+(use-package ido
+  :init (progn (ido-mode t)
+               (ido-everywhere 1)))
+
+(use-package ido-ubiquitous
+         :ensure t
+         :init (ido-ubiquitous-mode 1))
+
+                    ; * undo tree
+(use-package undo-tree
+  :ensure t
+  :diminish " U"
+  :init
+  (global-undo-tree-mode))
+
+                    ; * magit
+(use-package magit
+         :ensure t
+         :config (setq magit-completing-read-function 'magit-ido-completing-read)
+         :bind (("C-c m" . magit-status)))
+
+                    ; * cursors
+(use-package multiple-cursors
+  :ensure t
+  :bind (("C-S-c C-S-c" . mc/edit-lines)
+     ("C->". mc/mark-next-like-this)
+     ("C-<" . mc/mark-all-like-this)
+     ("C-S-c C-s" . mc/mark-all-in-region)
+     ("M-<mouse-1>" . mc/add-cursor-on-click))
+  :init
+  (global-unset-key (kbd "M-<down-mouse-1>")))
+
+                    ; * orgstruct
+(diminish 'orgstruct-mode " 0")
+(add-hook 'python-mode-hook 'turn-on-orgstruct)
+(add-hook 'python-mode-hook
+      (lambda () (setq-local orgstruct-heading-prefix-regexp "^\\s-*## ")))
+(add-hook 'emacs-lisp-mode-hook 'turn-on-orgstruct)
+(add-hook 'emacs-lisp-mode-hook
+      (lambda () (setq-local orgstruct-heading-prefix-regexp "^\\s-*; ")))
+
+(use-package org-bullets
+         :ensure t)
+
+
+                    ; * parens
+(use-package smartparens-config
+  :ensure smartparens
+  :init
+  (smartparens-global-mode t)
+  (show-smartparens-global-mode t))
+
+                    ; * browser
+(setq browse-url-browser-function 'browse-url-generic
+      browse-url-generic-program "firefox")
+
+                    ; * ivy
+(use-package swiper
+  :commands swiper
+  :diminish (ivy-mode . " I")
+  :bind ("C-s" . swiper)
+  :config
+  (setq ivy-use-virtual-buffers t)
+  (setq ivy-wrap t)
+  (setq ivy-count-format "(%d/%d) ")
+  ;; (setq magit-completing-read-function 'ivy-completing-read)
+  (setq ivy-sort-matches-functions-alist
+    '((t . ivy--prefix-sort)))
+  (ivy-set-actions
+   t
+   '(("z" insert "insert")))
+  (ivy-set-actions
+   t nil)
+  :init
+  (setq enable-recursive-minibuffers t)
+  (ivy-mode 1))
+
+(use-package counsel
+  :ensure t
+  :bind (("<menu>" . counsel-M-x)
+     ("M-x" . counsel-M-x)
+     ("C-x C-f" . counsel-find-file)
+     ("C-x f" . counsel-git)
+     ("C-x b" . ivy-switch-buffer)
+     ("C-c g" . counsel-ag)
+     ("C-h f" . counsel-describe-function)
+     ("C-h v" . counsel-describe-variable)))
+  (setq ivy-use-virtual-buffers t)
+  (setq ivy-wrap t)
+(setq ivy-count-format "(%d/%d) ")
+
+(use-package smex
+  :ensure t
+  :bind
+  :init (setq smex-completion-method 'ivy))
+(custom-set-faces
+ '(sp-pair-overlay-face ((t (:inherit nobreak-space)))))
+
+                    ; * pdf
+(use-package pdf-tools
+  :config
+  (pdf-tools-install))(use-package pdf-tools)
+
+                    ; * rainbow
+(use-package rainbow-mode
+  :ensure t
+  :diminish rainbow-mode
+  :init
+  (dolist (elem '(c++-mode-hook css-mode-hook web-mode-hook html-mode-hook python-mode-hook))
+    (add-hook elem 'rainbow-mode)))
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )
+
+                    ; * NYAN CAT
+(use-package nyan-mode
+  :ensure t
+  :init
+  (nyan-mode))
